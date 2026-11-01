@@ -28,7 +28,7 @@
     },
     {
      "key": "Access-Control-Allow-Origin",
-     "value": "https://airsense.vercel.app"
+     "value": "https://airsense-phi.vercel.app"
     },
     {
      "key": "Content-Security-Policy",

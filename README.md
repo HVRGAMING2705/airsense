@@ -17,4 +17,4 @@ Predicts the Air Quality Index (AQI) from PM2.5, PM10, nitrogen dioxide, ozone, 
 - `index.html` — interactive demo; the browser runs the exact same weights as Python
 
 ## Live demo
-https://airsense.vercel.app
+https://airsense-phi.vercel.app
