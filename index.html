@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AirSense — Air Quality Index Predictor | AI/ML Project</title>
+<meta name="description" content="AirSense predicts the Air Quality Index (AQI) from PM2.5, PM10, NO2, ozone, temperature, humidity and wind speed, using a ridge regression model trained on 600 synthetic city-days.">
+<link rel="canonical" href="https://airsense.vercel.app/">
+<meta property="og:title" content="AirSense — Air Quality Index Predictor">
+<meta property="og:description" content="Enter today's pollutant and weather readings and instantly estimate the AQI, with a real trained ML model running in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://airsense.vercel.app/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AirSense — Air Quality Index Predictor">
+<meta name="twitter:description" content="Ridge regression AQI predictor. Try the live demo in your browser.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AirSense","applicationCategory":"BusinessApplication","description":"Air Quality Index predictor using ridge regression.","url":"https://airsense.vercel.app/"}</script>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;max-width:720px;margin:0 auto;padding:24px;line-height:1.5}
+h1{font-size:2em} label{display:block;margin:12px 0 4px;font-weight:bold}
+input{width:100%;padding:10px;font-size:16px;border:1px solid #000;border-radius:4px;box-sizing:border-box}
+button{margin-top:20px;padding:12px 24px;font-size:17px;background:#000;color:#fff;border:none;border-radius:4px;cursor:pointer}
+#result{margin-top:24px;padding:20px;border:2px solid #000;border-radius:8px;display:none}
+#result b{font-size:2em}
+.note{color:#333;font-size:.95em} code{background:#f2f2f2;padding:2px 5px}
+</style>
+</head>
+<body>
+<h1>&#127744; AirSense — Air Quality Index Predictor</h1>
+<p class="note">A 2nd-year B.Tech AI/ML project by Vikranth Reddy. A ridge regression model trained on 600 synthetic city-days predicts the Air Quality Index (AQI) from pollutant and weather readings. 5-fold CV: <b>R&sup2; = 0.908</b>, MAE = 19.82 vs a 69.99 mean-guess baseline.</p>
+<label>PM2.5 (&micro;g/m&sup3;)</label><input id="pm25" type="number" value="90" min="0" max="500">
+<label>PM10 (&micro;g/m&sup3;)</label><input id="pm10" type="number" value="170" min="0" max="800">
+<label>Nitrogen dioxide NO2 (ppb)</label><input id="no2" type="number" value="55" min="0" max="300">
+<label>Ozone O3 (ppb)</label><input id="o3" type="number" value="50" min="0" max="300">
+<label>Temperature (&deg;C)</label><input id="temp" type="number" value="26" min="0" max="45">
+<label>Humidity (%)</label><input id="humidity" type="number" value="50" min="0" max="100">
+<label>Wind speed (km/h)</label><input id="wind" type="number" value="8" min="0" max="60">
+<button onclick="predict()">Estimate AQI</button>
+<div id="result"></div>
+<p class="note">How it works: each input is standardised with the training means and standard deviations, then multiplied by the model's learned coefficients. The exact same weights run in this page and in the Python training script (<code>train.py</code>), so the browser result matches the trained model to within 0.01 AQI points.</p>
+<p class="note">AQI guide: 0–50 Good, 51–100 Moderate, 101–150 Unhealthy for sensitive groups, 151–200 Unhealthy, 201–300 Very unhealthy, 301+ Hazardous. Try a sample: PM2.5 180, PM10 320, NO2 90, O3 60, 30&deg;C, 45% humidity, 3 km/h wind &rarr; about 238 AQI (Unhealthy).</p>
+<p><a href="https://github.com/HVRGAMING2705/airsense">View source on GitHub</a></p>
+<script>
+const MEANS = [153.8360999926753, 277.0033970900856, 63.27553917864186, 55.53740987153989, 23.606876944693962, 56.72322920065866, 14.427545626858876];
+const STDS = [83.22630904569239, 140.581648233394, 32.12135849567498, 25.737685379661112, 10.84165193705375, 21.093438316204725, 8.718189305750906];
+const COEF = [55.27251466856924, 22.103180650120773, 10.574014775789346, 4.649251213365086, 2.1403909799664667, 2.6868571230633256, -8.006261205757967];
+const INTERCEPT = 194.0835014367945;
+function category(a){
+  if (a <= 50) return "Good — air quality is fine, enjoy outdoor activities.";
+  if (a <= 100) return "Moderate — acceptable, but unusually sensitive people should watch symptoms.";
+  if (a <= 150) return "Unhealthy for sensitive groups — children, the elderly and people with breathing conditions should limit long outdoor exertion.";
+  if (a <= 200) return "Unhealthy — everyone may feel effects; sensitive groups should avoid long outdoor exertion.";
+  if (a <= 300) return "Very unhealthy — health alert: avoid outdoor exertion and keep windows closed.";
+  return "Hazardous — emergency conditions: stay indoors with an air purifier if possible.";
+}
+function predict(){
+  const ids = ["pm25","pm10","no2","o3","temp","humidity","wind"];
+  const v = ids.map(id => parseFloat(document.getElementById(id).value));
+  let y = INTERCEPT;
+  for (let j = 0; j < 7; j++) y += ((v[j]-MEANS[j])/STDS[j]) * COEF[j];
+  y = Math.max(20, Math.min(500, y));
+  const el = document.getElementById("result");
+  el.style.display = "block";
+  el.innerHTML = "<b>" + y.toFixed(0) + " AQI</b><br>" + category(y);
+}
+</script>
+</body>
+</html>

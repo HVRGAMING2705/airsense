@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://airsense.vercel.app/sitemap.xml
